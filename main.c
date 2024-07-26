@@ -65,11 +65,17 @@ void startGame(char playerX[], char playerO[]) {
 
     while (1) {
         int result = scanf("%d %d", &row, &col);
-        while (getchar() != '\n')
-        if (result != 2 || row < 0 || row > 2 || col < 0 || col > 2 || grid[row][col] != ' ') {
-            printf("Invalid move. Try again.\n");
-            continue;
-        }
+
+            if (result != 2 || row < 0 || row > 2 || col < 0 || col > 2) {
+                printf("Invalid move. Row and column must be between 0 and 2.\n");
+                continue;
+            }
+
+            if (grid[row][col] != ' ') {
+                printf("Cell already occupied. Try again.\n");
+                continue;
+            }
+
             grid[row][col]=currentPlayer;
             drawGrid(grid);
             moves++;
@@ -80,6 +86,7 @@ void startGame(char playerX[], char playerO[]) {
             }
             if(moves==9) {
                 printf("It's a draw!");
+                break;
             }
 
             if(currentPlayer=='X') {
