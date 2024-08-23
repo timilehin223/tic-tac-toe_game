@@ -1,26 +1,9 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 
-//Player names for Human vs Human
-void inputNames(char playerX[], char playerO[]) {
-    printf("Player 1 (X), insert your Username:\n");
-    scanf("%19s", playerX);
-    printf("Player 2 (O), insert your Username:\n");
-    scanf("%19s", playerO);
-    printf("Welcome %s and %s\n", playerX, playerO);
-}
-//Draw the game's grid
-void drawGrid(char grid[3][3]) {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            printf("[%c]", grid[i][j]);
-        }
-        printf("\n");
-    }
-}
-//How do you want to play?
-int gameMode() {
+int selectGameMode() {
     char gameModeChoice;
     while (1) {
         printf("Select a Game Mode:\n");
@@ -36,36 +19,25 @@ int gameMode() {
     }
 }
 
-int checkWin(char grid[3][3], char currentPlayer) {
-    // Check rows and columns
+void initializeGrid(char grid[3][3]) {
     for (int i = 0; i < 3; i++) {
-        if ((grid[i][0] == currentPlayer && grid[i][1] == currentPlayer && grid[i][2] == currentPlayer) ||
-            (grid[0][i] == currentPlayer && grid[1][i] == currentPlayer && grid[2][i] == currentPlayer)) {
-            return 1;
+        for (int j = 0; j < 3; j++) {
+            grid[i][j] = ' ';
         }
     }
-    // Check diagonals
-    if ((grid[0][0] == currentPlayer && grid[1][1] == currentPlayer && grid[2][2] == currentPlayer) ||
-        (grid[0][2] == currentPlayer && grid[1][1] == currentPlayer && grid[2][0] == currentPlayer)) {
-        return 1;
-    }
-    return 0;
 }
 
-void startGameHVH(char playerX[], char playerO[]) {
-    char grid[3][3] = {
-        {' ', ' ', ' '},
-        {' ', ' ', ' '},
-        {' ', ' ', ' '}
-    };
-    printf("%s (X) vs %s (O)\n", playerX, playerO);
-    drawGrid(grid);
+void drawGrid(char grid[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf("[%c]", grid[i][j]);
+        }
+        printf("\n");
+    }
+}
 
+void handlePlayerMove(char grid[3][3], char currentPlayer, char *currentPlayerName) {
     int row, col;
-    char currentPlayer = 'X';
-    char *currentPlayerName = playerX;
-    int moves = 0;
-
     while (1) {
         printf("%s, enter row and column (0-2): ", currentPlayerName);
         int result = scanf("%d %d", &row, &col);
@@ -81,19 +53,57 @@ void startGameHVH(char playerX[], char playerO[]) {
         }
 
         grid[row][col] = currentPlayer;
-        drawGrid(grid);
+        //drawGrid(grid);
+        break;
+    }
+}
+
+bool checkWin(char grid[3][3], char currentPlayer) {
+    for (int i = 0; i < 3; i++) {
+        if ((grid[i][0] == currentPlayer && grid[i][1] == currentPlayer && grid[i][2] == currentPlayer) ||
+            (grid[0][i] == currentPlayer && grid[1][i] == currentPlayer && grid[2][i] == currentPlayer)) {
+            return true;
+            }
+    }
+    if ((grid[0][0] == currentPlayer && grid[1][1] == currentPlayer && grid[2][2] == currentPlayer) ||
+        (grid[0][2] == currentPlayer && grid[1][1] == currentPlayer && grid[2][0] == currentPlayer)) {
+        return 1;
+        }
+    return 0;
+}
+
+void playHumanVsHuman() {
+    char grid[3][3];
+    initializeGrid(grid);
+
+    char playerX[20], playerO[20];
+    printf("Player 1 (X), insert your Username:\n");
+    scanf("%19s", playerX);
+    printf("Player 2 (O), insert your Username:\n");
+    scanf("%19s", playerO);
+    printf("Welcome %s and %s\n", playerX, playerO);
+
+    char currentPlayer = 'X';
+    char *currentPlayerName = playerX;
+    int moves = 0;
+
+    while (1) {
+        handlePlayerMove(grid, currentPlayer, currentPlayerName);
         moves++;
 
         if (checkWin(grid, currentPlayer)) {
+            drawGrid(grid);
             printf("Congratulations %s! You have won!\n", currentPlayerName);
             break;
         }
 
         if (moves == 9) {
+            drawGrid(grid);
             printf("It's a draw!\n");
             break;
         }
 
+        // Switch player
         if (currentPlayer == 'X') {
             currentPlayer = 'O';
             currentPlayerName = playerO;
@@ -104,62 +114,29 @@ void startGameHVH(char playerX[], char playerO[]) {
     }
 }
 
-void hvh() {
-    char playerX[20], playerO[20];
-    inputNames(playerX, playerO);
-    startGameHVH(playerX, playerO);
-}
-
-int selectDiff() {
-    printf("Select a difficulty:\n");
-    printf("A. Easy\nB. Medium\nC. Difficult\n");
+int selectDifficulty() {
     char level;
-    scanf(" %c", &level);
-    if (level == 'A') {
-        return 0;
-    } else if (level == 'B') {
-        return 1;
-    } else if (level == 'C') {
-        return 2;
-    } else {
+    while (1) {
+        printf("Select a difficulty:\n");
+        printf("A. Easy\nB. Medium\nC. Difficult\n");
+        scanf(" %c", &level);
+        if (level == 'A') return 0;
+        if (level == 'B') return 1;
+        if (level == 'C') return 2;
         printf("Invalid Choice. Please pick between A, B, and C.\n");
     }
 }
 
-void easyMode() {
-    char grid[3][3] = {
-        {' ', ' ', ' '},
-        {' ', ' ', ' '},
-        {' ', ' ', ' '}
-    };
-    char human[20];
-    printf("Enter your name: ");
-    scanf("%19s", human);
-
-    int row, col;
+void playHumanVsComputerEasy(char grid[3][3], char *human) {
     char currentPlayer = 'X';
     int moves = 0;
     srand(time(0));
 
     while (1) {
         if (currentPlayer == 'X') {
-            // Human's turn
-            printf("%s, enter row and column (0-2): ", human);
-            int result = scanf("%d %d", &row, &col);
-
-            if (result != 2 || row < 0 || row > 2 || col < 0 || col > 2) {
-                printf("Invalid move. Row and column must be between 0 and 2.\n");
-                continue;
-            }
-
-            if (grid[row][col] != ' ') {
-                printf("Cell already occupied. Try again.\n");
-                continue;
-            }
-
-            grid[row][col] = 'X';
+            handlePlayerMove(grid, currentPlayer, human);
         } else {
-            // Computer's turn (random move)
+            int row, col;
             do {
                 row = rand() % 3;
                 col = rand() % 3;
@@ -172,7 +149,6 @@ void easyMode() {
         drawGrid(grid);
         moves++;
 
-        // Check if the current player won
         if (checkWin(grid, currentPlayer)) {
             if (currentPlayer == 'X') {
                 printf("Congratulations %s! You have won!\n", human);
@@ -182,53 +158,107 @@ void easyMode() {
             break;
         }
 
-        // Check for a draw
         if (moves == 9) {
             printf("It's a draw!\n");
             break;
         }
 
-        // Switch player
         currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
     }
 }
 
-void hvc() {
-    int difficulty = selectDiff();
-    if (difficulty == 0) {
-        easyMode();
+bool findWinningMove(char grid[3][3], char symbol, int *row, int *col) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (grid[i][j] == ' ') {
+                grid[i][j] = symbol;
+                if (checkWin(grid, symbol)) {
+                    *row = i;
+                    *col = j;
+                    return true;
+                }
+                grid[i][j] = ' ';
+            }
+        }
+    }
+    return false;
+}
+
+void playHumanVsComputerMedium(char grid[3][3], char *human) {
+    char currentPlayer = 'X';
+    int moves = 0;
+    srand(time(0));
+
+    while (1) {
+        if (currentPlayer == 'X') {
+            handlePlayerMove(grid, currentPlayer, human);
+        } else {
+            int row, col;
+            if (findWinningMove(grid, 'O', &row, &col)) {
+                grid[row][col] = 'O';
+                printf("Computer chooses: %d %d\n", row, col);
+            } else if (findWinningMove(grid, 'X', &row, &col)) {
+                grid[row][col] = 'O';
+                printf("Computer chooses: %d %d\n", row, col);
+            } else {
+                do {
+                    row = rand() % 3;
+                    col = rand() % 3;
+                } while (grid[row][col] != ' ');
+
+                printf("Computer chooses: %d %d\n", row, col);
+                grid[row][col] = 'O';
+            }
+        }
+
+        drawGrid(grid);
+        moves++;
+
+        if (checkWin(grid, currentPlayer)) {
+            if (currentPlayer == 'X') {
+                printf("Congratulations %s! You have won!\n", human);
+            } else {
+                printf("Computer wins!\n");
+            }
+            break;
+        }
+
+        if (moves == 9) {
+            printf("It's a draw!\n");
+            break;
+        }
+
+        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
     }
 }
 
-void startGameHVC(int difficulty) {
-    char grid[3][3] = {
-        {' ', ' ', ' '},
-        {' ', ' ', ' '},
-        {' ', ' ', ' '}
-    };
-    printf("Enter your name: ");
+void playHumanVsComputer(int difficulty){
+    char grid[3][3];
+    initializeGrid(grid);
+
     char human[20];
+    printf("Player 1 (X), insert your Username:\n");
     scanf("%19s", human);
-    printf("%s (X) vs Computer (O)\n", human);
-    drawGrid(grid);
 
-    difficulty=selectDiff;
     if (difficulty == 0) {
-        easyMode(human);
+        playHumanVsComputerEasy(grid, human);
+    } else if (difficulty == 1) {
+        playHumanVsComputerMedium(grid, human);
+    } else {
+        //playHumanVsComputerDifficult(grid,human);
     }
-}
+    }
 
 int main(void) {
-    int mode = gameMode();
-    if (mode == 1) {
-        hvh();
-    } else {
-        hvc();
-        //const int difficulty = selectDiff();
-        //if(difficulty==0){
-        //easyMode()};
-        //startGameHVC(difficulty);
+        int mode = selectGameMode();
+
+        if (mode == 1) {
+            playHumanVsHuman();
+        } else {
+            int difficulty = selectDifficulty();
+            playHumanVsComputer(difficulty);
+        }
+
+        return 0;
     }
 
-    return 0;
-}
