@@ -237,42 +237,38 @@ bool isMovesLeft(char grid[3][3]) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (grid[i][j] == ' ') {
-                return true;  // There are still moves left
+                return true;
             }
         }
     }
-    return false;  // No moves left
+    return false;
 }
 
 int evaluate(char grid[3][3]) {
-    // Check rows for a win
     for (int row = 0; row < 3; row++) {
         if (grid[row][0] == grid[row][1] && grid[row][1] == grid[row][2]) {
-            if (grid[row][0] == 'O') return 10;   // Computer wins
-            if (grid[row][0] == 'X') return -10;  // Human wins
+            if (grid[row][0] == 'O') return 10;
+            if (grid[row][0] == 'X') return -10;
         }
     }
 
-    // Check columns for a win
     for (int col = 0; col < 3; col++) {
         if (grid[0][col] == grid[1][col] && grid[1][col] == grid[2][col]) {
-            if (grid[0][col] == 'O') return 10;   // Computer wins
-            if (grid[0][col] == 'X') return -10;  // Human wins
+            if (grid[0][col] == 'O') return 10;
+            if (grid[0][col] == 'X') return -10;
         }
     }
 
-    // Check diagonals for a win
     if (grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2]) {
-        if (grid[0][0] == 'O') return 10;         // Computer wins
-        if (grid[0][0] == 'X') return -10;        // Human wins
+        if (grid[0][0] == 'O') return 10;
+        if (grid[0][0] == 'X') return -10;
     }
 
     if (grid[0][2] == grid[1][1] && grid[1][1] == grid[2][0]) {
-        if (grid[0][2] == 'O') return 10;         // Computer wins
-        if (grid[0][2] == 'X') return -10;        // Human wins
+        if (grid[0][2] == 'O') return 10;
+        if (grid[0][2] == 'X') return -10;
     }
 
-    // No one wins
     return 0;
 }
 
@@ -285,16 +281,16 @@ int minimax(char grid[3][3], int depth, bool isMaximizing) {
         return score + depth;
 
     if (!isMovesLeft(grid))
-        return 0; //Draw
+        return 0;
 
     if (isMaximizing) {
         int best = INT_MIN;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (grid[i][j] == ' ') {
-                    grid[i][j] = 'O'; // Computer's move
+                    grid[i][j] = 'O';
                     best = fmax(best, minimax(grid, depth + 1, false));
-                    grid[i][j] = ' '; // Undo move
+                    grid[i][j] = ' ';
                 }
             }
         }
@@ -304,9 +300,9 @@ int minimax(char grid[3][3], int depth, bool isMaximizing) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (grid[i][j] == ' ') {
-                    grid[i][j] = 'X'; // Human's move
+                    grid[i][j] = 'X';
                     best = fmin(best, minimax(grid, depth + 1, true));
-                    grid[i][j] = ' '; // Undo move
+                    grid[i][j] = ' ';
                 }
             }
         }
@@ -348,7 +344,7 @@ void playHumanVsComputerDifficult(char grid[3][3], char *human) {
             handlePlayerMove(grid, currentPlayer, human);
         } else {
             int bestRow, bestCol;
-            findBestMove(grid, &bestRow, &bestCol);  // Determine the best move
+            findBestMove(grid, &bestRow, &bestCol);
             printf("Computer chooses: %d %d\n", bestRow, bestCol);
             grid[bestRow][bestCol] = 'O';  // Computer makes its move
         }
